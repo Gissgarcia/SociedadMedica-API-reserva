@@ -25,7 +25,8 @@ public class SecurityConfig {
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/reservas").permitAll()
+                        // ⬇️ Permitimos todas las operaciones sobre /api/reservas2
+                        .requestMatchers("/api/reservas", "/api/reservas/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

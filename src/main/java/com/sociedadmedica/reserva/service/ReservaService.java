@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,71 +16,68 @@ public class ReservaService {
 
     private final ReservaRepository repository;
 
-    public ReservaResponse crearReserva(ReservaRequest req) {
-
-        ReservaModel entity = ReservaModel.builder()
-                .nombre(req.getNombre())
-                .apellido(req.getApellido())
-                .edad(req.getEdad())
-                .tipoDocumento(req.getTipoDocumento())
-                .numeroDocumento(req.getNumeroDocumento())
-                .correo(req.getCorreo())
-                .fechaReserva(req.getFechaReserva())
+    // CREATE
+    public ReservaResponse crearReserva(ReservaRequest request) {
+        ReservaModel model = ReservaModel.builder()
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .edad(request.getEdad())
+                .tipoDocumento(request.getTipoDocumento())
+                .numeroDocumento(request.getNumeroDocumento())
+                .correo(request.getCorreo())
+                .fechaReserva(request.getFechaReserva())
                 .build();
 
-        ReservaModel saved = repository.save(entity);
-
-        return ReservaResponse.builder()
-                .id(saved.getId())
-                .nombre(saved.getNombre())
-                .apellido(saved.getApellido())
-                .edad(saved.getEdad())
-                .tipoDocumento(saved.getTipoDocumento().name())
-                .numeroDocumento(saved.getNumeroDocumento())
-                .correo(saved.getCorreo())
-                .fechaReserva(saved.getFechaReserva())
-                .build();
+        ReservaModel guardada = repository.save(model);
+        return toResponse(guardada);
     }
+
+    // READ: todas
     public List<ReservaResponse> listarTodas() {
         return repository.findAll()
                 .stream()
                 .map(this::toResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    // ✅ Buscar por id
+    // READ: por id
     public ReservaResponse buscarPorId(Long id) {
-        ReservaModel entity = repository.findById(id)
+        ReservaModel model = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-        return toResponse(entity);
+        return toResponse(model);
     }
 
-    // ✅ Actualizar
-    public ReservaResponse actualizarReserva(Long id, ReservaRequest req) {
-        ReservaModel entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
-
-        entity.setNombre(req.getNombre());
-        entity.setApellido(req.getApellido());
-        entity.setEdad(req.getEdad());
-        entity.setTipoDocumento(req.getTipoDocumento());
-        entity.setNumeroDocumento(req.getNumeroDocumento());
-        entity.setCorreo(req.getCorreo());
-        entity.setFechaReserva(req.getFechaReserva());
-
-        ReservaModel updated = repository.save(entity);
-        return toResponse(updated);
+    // READ: por correo (para "Mis reservas")
+    public List<ReservaResponse> listarPorCorreo(String correo) {
+        return repository.findByCorreo(correo)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    // ✅ Eliminar
+    // UPDATE
+    public ReservaResponse actualizarReserva(Long id, ReservaRequest request) {
+        ReservaModel model = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+
+        model.setNombre(request.getNombre());
+        model.setApellido(request.getApellido());
+        model.setEdad(request.getEdad());
+        model.setTipoDocumento(request.getTipoDocumento());
+        model.setNumeroDocumento(request.getNumeroDocumento());
+        model.setCorreo(request.getCorreo());
+        model.setFechaReserva(request.getFechaReserva());
+
+        ReservaModel guardada = repository.save(model);
+        return toResponse(guardada);
+    }
+
+    // DELETE
     public void eliminarReserva(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Reserva no encontrada");
-        }
         repository.deleteById(id);
     }
 
-    // 👉 helper para no repetir código
+    // helper
     private ReservaResponse toResponse(ReservaModel e) {
         return ReservaResponse.builder()
                 .id(e.getId())

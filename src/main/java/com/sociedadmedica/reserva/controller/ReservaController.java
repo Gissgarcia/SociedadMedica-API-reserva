@@ -1,9 +1,6 @@
 package com.sociedadmedica.reserva.controller;
 
-
-
 import com.sociedadmedica.reserva.model.ReservaRequest;
-
 import com.sociedadmedica.reserva.model.ReservaResponse;
 import com.sociedadmedica.reserva.service.ReservaService;
 import lombok.RequiredArgsConstructor;
@@ -14,27 +11,33 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reservas")
 @RequiredArgsConstructor
-@CrossOrigin // para que React pueda pegarle desde http://localhost:3000
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class ReservaController {
 
     private final ReservaService service;
 
     // CREATE
     @PostMapping
-    public ReservaResponse crearReserva(@RequestBody ReservaRequest request) {
+    public ReservaResponse crear(@RequestBody ReservaRequest request) {
         return service.crearReserva(request);
     }
 
-    // READ - todas
+    // READ: listar todas
     @GetMapping
     public List<ReservaResponse> listar() {
         return service.listarTodas();
     }
 
-    // READ - una por id
+    // READ: una por id
     @GetMapping("/{id}")
     public ReservaResponse obtenerPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
+    }
+
+    // READ: reservas de un usuario (por correo)
+    @GetMapping("/por-usuario")
+    public List<ReservaResponse> listarPorUsuario(@RequestParam String correo) {
+        return service.listarPorCorreo(correo);
     }
 
     // UPDATE
