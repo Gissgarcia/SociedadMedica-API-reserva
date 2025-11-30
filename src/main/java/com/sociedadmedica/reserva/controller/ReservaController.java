@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reservas2")
+@RequestMapping("/api/reservas")
 @RequiredArgsConstructor
 @CrossOrigin // para que React pueda pegarle desde http://localhost:3000
 public class ReservaController {
